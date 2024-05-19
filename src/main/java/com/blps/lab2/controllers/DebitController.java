@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/debit")
-public class DebitController {
+public class DebitController implements ControllerInt{
 
     private final DebitService debitService;
     private final CommonService commonService;

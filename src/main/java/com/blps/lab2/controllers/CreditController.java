@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/credit")
-public class CreditController {
+public class CreditController implements ControllerInt{
     private final CreditService creditService;
     private final CommonService commonService;
 
@@ -36,6 +36,7 @@ public class CreditController {
         return creditService.getApprovedCards(commonService.extractIdFromJWT(authorizationHeader));
 
     }
+    @Override
     @Operation(summary = "Заполнение профиля")
     @PostMapping(value = "/fill_profile")
     public ResponseEntity<?> fillProfile(@RequestHeader("Authorization") String authorizationHeader,@Valid @RequestBody UserDataDTO userDataDTO){
