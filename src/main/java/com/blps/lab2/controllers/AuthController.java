@@ -1,8 +1,8 @@
 package com.blps.lab2.controllers;
 
-import com.blps.lab2.dto.utils.JwtAuthenticationResponse;
-import com.blps.lab2.dto.utils.SignInRequest;
-import com.blps.lab2.dto.utils.SignUpRequest;
+import com.blps.lab2.security.utils.JwtAuthenticationResponse;
+import com.blps.lab2.security.utils.SignInRequest;
+import com.blps.lab2.security.utils.SignUpRequest;
 import com.blps.lab2.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;

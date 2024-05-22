@@ -1,7 +1,7 @@
 package com.blps.lab2.controllers;
 
-import com.blps.lab2.dto.utils.DataRequest;
-import com.blps.lab2.dto.utils.LongWrapper;
+import com.blps.lab2.security.utils.DataRequest;
+import com.blps.lab2.security.utils.LongWrapper;
 import com.blps.lab2.service.ApprovingService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -31,7 +31,7 @@ public class ApprovingController {
 
     @Operation(summary="Выбор одобренных предложений")
     @PostMapping(value = "/result")
-    public ResponseEntity<?> result(@RequestBody DataRequest approvalRequest) {
+    public ResponseEntity<?> result(@RequestBody DataRequest approvalRequest) throws Exception {
         LongWrapper longWrapper = approvalRequest.getLongWrapper();
         List<Long> cardsId = approvalRequest.getCardsId();
         return approvingService.getResult(longWrapper.getId(), cardsId);

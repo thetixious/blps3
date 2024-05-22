@@ -1,8 +1,8 @@
 package com.blps.lab2.service;
 
-import com.blps.lab2.dto.utils.JwtAuthenticationResponse;
-import com.blps.lab2.dto.utils.SignInRequest;
-import com.blps.lab2.dto.utils.SignUpRequest;
+import com.blps.lab2.security.utils.JwtAuthenticationResponse;
+import com.blps.lab2.security.utils.SignInRequest;
+import com.blps.lab2.security.utils.SignUpRequest;
 import com.blps.lab2.model.User;
 import com.blps.lab2.security.JwtService;
 import com.blps.lab2.utils.Role;

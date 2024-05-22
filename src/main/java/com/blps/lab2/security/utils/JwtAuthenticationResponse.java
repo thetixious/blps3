@@ -1,4 +1,4 @@
-package com.blps.lab2.dto.utils;
+package com.blps.lab2.security.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

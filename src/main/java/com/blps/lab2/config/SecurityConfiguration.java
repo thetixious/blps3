@@ -1,5 +1,6 @@
-package com.blps.lab2.security;
+package com.blps.lab2.config;
 
+import com.blps.lab2.security.JwtAuthenticationFilter;
 import com.blps.lab2.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

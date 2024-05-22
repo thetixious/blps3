@@ -1,5 +1,7 @@
 package com.blps.lab2.service;
 
+import com.atomikos.icatch.jta.UserTransactionImp;
+import com.atomikos.jdbc.AtomikosDataSourceBean;
 import com.blps.lab2.dto.CreditOfferDTO;
 import com.blps.lab2.model.Cards;
 import com.blps.lab2.model.CreditOffer;
@@ -12,6 +14,7 @@ import com.blps.lab2.utils.CardType;
 import com.blps.lab2.utils.Goal;
 import com.blps.lab2.utils.mapper.CreditCardMapper;
 import com.blps.lab2.utils.mapper.CreditOfferMapper;
+import jakarta.transaction.UserTransaction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class CreditService {
     private final CreditCardMapper creditCardMapper;
     private final CreditRepository creditRepository;
     private final CommonService commonService;
+    private CreditOfferDTO creditOfferDTO;
 
     public CreditService(CardRepository cardRepository, UserRepository userRepository, CreditOfferMapper creditOfferMapper, CreditCardMapper creditCardMapper,
                          CreditRepository creditRepository, CommonService commonService) {
@@ -44,7 +48,7 @@ public class CreditService {
     public Set<Cards> getUncheckedCards(CreditOffer creditOffer) {
         Goal goal = creditOffer.getGoal();
         Bonus bonus = creditOffer.getBonus();
-        return cardRepository.findAllByTypeAndGoalOrBonus(CardType.CREDIT, goal, bonus );
+        return cardRepository.findAllByTypeAndGoalOrBonus(CardType.CREDIT, goal, bonus);
 
     }
 
@@ -64,7 +68,7 @@ public class CreditService {
     public ResponseEntity<?> getApprovedCards(Long id) {
 
         ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
-        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id,true, false);
+        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, true, false);
 
         if (userCheckResponse != null)
             return userCheckResponse;
@@ -78,7 +82,6 @@ public class CreditService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Сначала заполните профиль");
 
 
-
         CreditOffer creditOffer = creditRepository.findByUserId(id);
         if (!creditOffer.getReady())
             return ResponseEntity.status(HttpStatus.OK).body("Запрос в процессе обработки");
@@ -86,9 +89,10 @@ public class CreditService {
         return ResponseEntity.status(HttpStatus.OK).body(creditOffer.getCards().stream().map(creditCardMapper::toDTO).collect(Collectors.toList()));
 
     }
-    public ResponseEntity<?> creatOffer(Long id, CreditOfferDTO creditOfferDTO){
+
+    public ResponseEntity<?> creatOffer(Long id, CreditOfferDTO creditOfferDTO) {
         ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
-        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id,false,false);
+        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, false, false);
 
         if (userCheckResponse != null)
             return userCheckResponse;
@@ -99,9 +103,9 @@ public class CreditService {
         return ResponseEntity.status(HttpStatus.OK).body(setOffer(creditOfferDTO, id));
     }
 
-    public ResponseEntity<?> getCards(Long id){
+    public ResponseEntity<?> getCards(Long id) {
         ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
-        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, true,false);
+        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, true, false);
 
         if (userCheckResponse != null)
             return userCheckResponse;
@@ -117,7 +121,7 @@ public class CreditService {
         CreditOffer creditOffer = creditRepository.findByUserId(id);
         Goal goal = creditOffer.getGoal();
         Bonus bonus = creditOffer.getBonus();
-        Set<Cards> cardsList = cardRepository.findAllByTypeAndGoalOrBonus(CardType.CREDIT,goal, bonus);
+        Set<Cards> cardsList = cardRepository.findAllByTypeAndGoalOrBonus(CardType.CREDIT, goal, bonus);
 
         if (cardsList.isEmpty())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Нет карт с таким набором бонусов или целей");
@@ -125,10 +129,26 @@ public class CreditService {
         return ResponseEntity.ok(cardsList.stream().map(creditCardMapper::toDTO).toList());
     }
 
-    public ResponseEntity<?> updateOfferByChosenCards(Long id, List<Long> cardsId) {
-        CreditOffer creditOffer = creditRepository.findByUserId(id);
-        creditOffer.setCards(cardRepository.findAllByIdIn(cardsId));
-        return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(creditRepository.save(creditOffer)));
+    public ResponseEntity<?> updateOfferByChosenCards(Long id, List<Long> cardsId) throws Exception {
+        boolean rollback = false;
+        try {
+            CreditOffer creditOffer = creditRepository.findByUserId(id);
+            creditOffer.setCards(cardRepository.findAllByIdIn(cardsId));
+            creditRepository.save(creditOffer);
+            creditOfferDTO = creditOfferMapper.toDTO(creditOffer);
+        } catch (Exception e) {
+            rollback = true;
+            e.printStackTrace();
+        } finally {
+            if (rollback) {
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tx crashed");
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(creditOfferDTO);
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("транзакция не удалась)");
     }
+
 
 }

@@ -12,5 +12,5 @@ public interface ControllerInt {
 
     @Operation(summary = "Заполнение профиля")
     @PostMapping(value = "/fill_profile")
-    ResponseEntity<?> fillProfile(@RequestHeader("Authorization") String authorizationHeader, @Valid @RequestBody UserDataDTO userDataDTO);
+    ResponseEntity<?> fillProfile(@RequestHeader("Authorization") String authorizationHeader, @Valid @RequestBody UserDataDTO userDataDTO) throws Exception;
 }

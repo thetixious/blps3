@@ -39,7 +39,7 @@ public class CreditController implements ControllerInt{
     @Override
     @Operation(summary = "Заполнение профиля")
     @PostMapping(value = "/fill_profile")
-    public ResponseEntity<?> fillProfile(@RequestHeader("Authorization") String authorizationHeader,@Valid @RequestBody UserDataDTO userDataDTO){
+    public ResponseEntity<?> fillProfile(@RequestHeader("Authorization") String authorizationHeader,@Valid @RequestBody UserDataDTO userDataDTO) throws Exception {
         return commonService.toFillProfile(commonService.extractIdFromJWT(authorizationHeader), userDataDTO);
     }
     @Operation(summary = "Вывод подходящих карт по бонусной программе")
@@ -49,7 +49,7 @@ public class CreditController implements ControllerInt{
     }
     @Operation(summary = "Выбор предпочитаемых карт")
     @PostMapping(value="/choose_cards")
-    public ResponseEntity<?> chooseCards(@RequestHeader("Authorization") String authorizationHeader,@RequestBody List<Long> cardsId){
+    public ResponseEntity<?> chooseCards(@RequestHeader("Authorization") String authorizationHeader,@RequestBody List<Long> cardsId) throws Exception {
         return creditService.updateOfferByChosenCards(commonService.extractIdFromJWT(authorizationHeader),cardsId);
 
 

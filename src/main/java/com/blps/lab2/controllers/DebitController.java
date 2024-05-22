@@ -38,7 +38,7 @@ public class DebitController implements ControllerInt{
     }
     @Operation(summary = "Заполнение профиля")
     @PostMapping(value = "/fill_profile")
-    public ResponseEntity<?> fillProfile (@RequestHeader("Authorization") String authorizationHeader, @Valid @RequestBody UserDataDTO userDataDTO){
+    public ResponseEntity<?> fillProfile (@RequestHeader("Authorization") String authorizationHeader, @Valid @RequestBody UserDataDTO userDataDTO) throws Exception {
         return commonService.toFillProfile(commonService.extractIdFromJWT(authorizationHeader),userDataDTO);
     }
 
