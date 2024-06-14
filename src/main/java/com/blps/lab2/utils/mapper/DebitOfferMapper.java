@@ -1,7 +1,7 @@
 package com.blps.lab2.utils.mapper;
 
 import com.blps.lab2.dto.DebitOfferDTO;
-import com.blps.lab2.model.DebitOffer;
+import com.blps.lab2.model.mainDB.DebitOffer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.stereotype.Component;

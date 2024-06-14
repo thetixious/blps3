@@ -29,7 +29,7 @@ public class ApprovingController {
 
     }
 
-    @Operation(summary="Выбор одобренных предложений")
+    @Operation(summary="Одобрение выбранных карт")
     @PostMapping(value = "/result")
     public ResponseEntity<?> result(@RequestBody DataRequest approvalRequest) throws Exception {
         LongWrapper longWrapper = approvalRequest.getLongWrapper();

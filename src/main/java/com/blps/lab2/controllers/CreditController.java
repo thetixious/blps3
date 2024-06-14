@@ -24,7 +24,7 @@ public class CreditController implements ControllerInt{
     }
     @Operation(summary = "Создание заявки на кредитную карту")
     @PostMapping(value = "/offer")
-    public ResponseEntity<?> offer(@RequestHeader("Authorization") String authorizationHeader,@Valid @RequestBody CreditOfferDTO creditOfferDTO) {
+    public ResponseEntity<?> offer(@RequestHeader("Authorization") String authorizationHeader,@Valid @RequestBody CreditOfferDTO creditOfferDTO) throws Exception {
 
         return creditService.creatOffer(commonService.extractIdFromJWT(authorizationHeader), creditOfferDTO);
 

@@ -1,20 +1,23 @@
 package com.blps.lab2.service;
 
-import com.blps.lab2.model.User;
-import com.blps.lab2.repo.UserRepository;
-import lombok.RequiredArgsConstructor;
+import com.blps.lab2.model.mainDB.User;
+import com.blps.lab2.repo.main.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
 
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+    @Transactional
     public User save(User user) {
-        return userRepository.save(user);
+        return userRepository.saveAndFlush(user);
     }
 
     public User create(User user) {

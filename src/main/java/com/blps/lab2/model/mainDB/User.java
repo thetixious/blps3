@@ -1,4 +1,4 @@
-package com.blps.lab2.model;
+package com.blps.lab2.model.mainDB;
 
 import com.blps.lab2.utils.Role;
 import jakarta.persistence.*;
@@ -24,6 +24,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String username;
     private String name;
     private String surname;

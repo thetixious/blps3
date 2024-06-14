@@ -1,12 +1,12 @@
 package com.blps.lab2.service;
 
 import com.blps.lab2.dto.DebitOfferDTO;
-import com.blps.lab2.model.Cards;
-import com.blps.lab2.model.DebitOffer;
-import com.blps.lab2.model.User;
-import com.blps.lab2.repo.CardRepository;
-import com.blps.lab2.repo.DebitRepository;
-import com.blps.lab2.repo.UserRepository;
+import com.blps.lab2.model.mainDB.Cards;
+import com.blps.lab2.model.mainDB.DebitOffer;
+import com.blps.lab2.model.mainDB.User;
+import com.blps.lab2.repo.main.CardRepository;
+import com.blps.lab2.repo.main.DebitRepository;
+import com.blps.lab2.repo.main.UserRepository;
 import com.blps.lab2.utils.Bonus;
 import com.blps.lab2.utils.CardType;
 import com.blps.lab2.utils.Goal;
@@ -90,7 +90,7 @@ public class DebitService {
         DebitOffer debitOffer = DTOToDebitOffer(debitOfferDTO);
         debitOffer.setCard_user(userRepository.findById(id).get());
 
-        return ResponseEntity.ok(debitOfferToDTO(debitRepository.save(debitOffer)));
+        return ResponseEntity.ok(debitOfferToDTO(debitRepository.saveAndFlush(debitOffer)));
     }
 
 

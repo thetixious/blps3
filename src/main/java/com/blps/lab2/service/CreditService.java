@@ -1,23 +1,25 @@
 package com.blps.lab2.service;
 
-import com.atomikos.icatch.jta.UserTransactionImp;
-import com.atomikos.jdbc.AtomikosDataSourceBean;
 import com.blps.lab2.dto.CreditOfferDTO;
-import com.blps.lab2.model.Cards;
-import com.blps.lab2.model.CreditOffer;
-import com.blps.lab2.model.User;
-import com.blps.lab2.repo.CardRepository;
-import com.blps.lab2.repo.CreditRepository;
-import com.blps.lab2.repo.UserRepository;
+import com.blps.lab2.model.bankDB.Manager;
+import com.blps.lab2.model.mainDB.Cards;
+import com.blps.lab2.model.mainDB.CreditOffer;
+import com.blps.lab2.model.mainDB.User;
+import com.blps.lab2.repo.bank.ManagerRepository;
+import com.blps.lab2.repo.main.CardRepository;
+import com.blps.lab2.repo.main.CreditRepository;
+import com.blps.lab2.repo.main.UserRepository;
 import com.blps.lab2.utils.Bonus;
 import com.blps.lab2.utils.CardType;
 import com.blps.lab2.utils.Goal;
 import com.blps.lab2.utils.mapper.CreditCardMapper;
 import com.blps.lab2.utils.mapper.CreditOfferMapper;
-import jakarta.transaction.UserTransaction;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,15 +36,17 @@ public class CreditService {
     private final CreditRepository creditRepository;
     private final CommonService commonService;
     private CreditOfferDTO creditOfferDTO;
+    private final ManagerRepository managerRepository;
 
     public CreditService(CardRepository cardRepository, UserRepository userRepository, CreditOfferMapper creditOfferMapper, CreditCardMapper creditCardMapper,
-                         CreditRepository creditRepository, CommonService commonService) {
+                         CreditRepository creditRepository, CommonService commonService, @Qualifier("managerRepository") ManagerRepository managerRepository) {
         this.cardRepository = cardRepository;
         this.userRepository = userRepository;
         this.creditOfferMapper = creditOfferMapper;
         this.creditCardMapper = creditCardMapper;
         this.creditRepository = creditRepository;
         this.commonService = commonService;
+        this.managerRepository = managerRepository;
     }
 
     public Set<Cards> getUncheckedCards(CreditOffer creditOffer) {
@@ -52,7 +56,6 @@ public class CreditService {
 
     }
 
-
     public CreditOfferDTO setOffer(CreditOfferDTO creditOfferDTO, Long id) {
         CreditOffer creditOffer = creditOfferMapper.toEntity(creditOfferDTO);
         creditOffer.setCard_user(userRepository.findById(id).get());
@@ -60,7 +63,7 @@ public class CreditService {
         creditOffer.setApproved(false);
         creditOffer.setCards(getUncheckedCards(creditOffer));
         creditOffer.setCredit_limit(creditOfferDTO.getCreditLimit());
-        return creditOfferMapper.toDTO(creditRepository.save(creditOffer));
+        return creditOfferMapper.toDTO(creditRepository.saveAndFlush(creditOffer));
 
     }
 
@@ -90,7 +93,8 @@ public class CreditService {
 
     }
 
-    public ResponseEntity<?> creatOffer(Long id, CreditOfferDTO creditOfferDTO) {
+    @Transactional("transactionManager")
+    public ResponseEntity<?> creatOffer(Long id, CreditOfferDTO creditOfferDTO) throws Exception {
         ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
         ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, false, false);
 
@@ -100,7 +104,17 @@ public class CreditService {
         if (offerCheckResponse != null)
             return offerCheckResponse;
 
-        return ResponseEntity.status(HttpStatus.OK).body(setOffer(creditOfferDTO, id));
+        CreditOffer creditOffer = creditOfferMapper.toEntity(creditOfferDTO);
+        creditOffer.setCard_user(userRepository.findById(id).orElseThrow(() -> new Exception("User not found")));
+        creditOffer.setReady(false);
+        creditOffer.setApproved(false);
+        creditOffer.setCards(getUncheckedCards(creditOffer));
+        creditOffer.setCredit_limit(creditOfferDTO.getCreditLimit());
+
+        CreditOffer savedCreditOffer = creditRepository.save(creditOffer);
+        return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(savedCreditOffer));
+
+
     }
 
     public ResponseEntity<?> getCards(Long id) {
@@ -129,25 +143,33 @@ public class CreditService {
         return ResponseEntity.ok(cardsList.stream().map(creditCardMapper::toDTO).toList());
     }
 
-    public ResponseEntity<?> updateOfferByChosenCards(Long id, List<Long> cardsId) throws Exception {
-        boolean rollback = false;
-        try {
+    public ResponseEntity<?> updateOfferByChosenCards(Long id, List<Long> cardsId) {
+
             CreditOffer creditOffer = creditRepository.findByUserId(id);
             creditOffer.setCards(cardRepository.findAllByIdIn(cardsId));
             creditRepository.save(creditOffer);
             creditOfferDTO = creditOfferMapper.toDTO(creditOffer);
-        } catch (Exception e) {
-            rollback = true;
-            e.printStackTrace();
-        } finally {
-            if (rollback) {
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tx crashed");
-            } else {
-                return ResponseEntity.status(HttpStatus.OK).body(creditOfferDTO);
-            }
-        }
+            return ResponseEntity.status(HttpStatus.OK).body(creditOfferDTO);
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("транзакция не удалась)");
+
+
+//
+//        CreditOffer creditOffer = creditRepository.findByUserId(id);
+//        creditOffer.setCards(cardRepository.findAllByIdIn(cardsId));
+//        creditRepository.saveAndFlush(creditOffer);
+//
+//        Optional<Manager> managerOptional = managerRepository.findFirstByStatusFalse();
+//        StringBuilder info = new StringBuilder();
+//        info.append(creditOffer.getCard_user().getEmail());
+//        info.append(creditOffer.getCredit_limit());
+//        info.append(creditOffer.getCard_user().getPassport());
+//        managerRepository.updateUserNameById(managerOptional.get().getId(), info.toString());
+//
+//
+//        creditOfferDTO = creditOfferMapper.toDTO(creditOffer);
+//        return ResponseEntity.status(HttpStatus.OK).body(creditOfferDTO);
+
+
     }
 
 

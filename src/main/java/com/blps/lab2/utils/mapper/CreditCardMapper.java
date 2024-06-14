@@ -1,7 +1,7 @@
 package com.blps.lab2.utils.mapper;
 
 import com.blps.lab2.dto.CreditCardDTO;
-import com.blps.lab2.model.Cards;
+import com.blps.lab2.model.mainDB.Cards;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

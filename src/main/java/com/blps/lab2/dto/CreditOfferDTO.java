@@ -1,6 +1,6 @@
 package com.blps.lab2.dto;
 
-import com.blps.lab2.model.Cards;
+import com.blps.lab2.model.mainDB.Cards;
 import com.blps.lab2.utils.Bonus;
 import com.blps.lab2.utils.Goal;
 import lombok.Data;

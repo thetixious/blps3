@@ -1,19 +1,20 @@
 package com.blps.lab2.service;
 
-import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
 import com.blps.lab2.dto.UserDataDTO;
-import com.blps.lab2.model.User;
-import com.blps.lab2.repo.CreditRepository;
-import com.blps.lab2.repo.DebitRepository;
-import com.blps.lab2.repo.UserRepository;
+import com.blps.lab2.model.mainDB.User;
+import com.blps.lab2.repo.main.CreditRepository;
+import com.blps.lab2.repo.main.DebitRepository;
+import com.blps.lab2.repo.main.UserRepository;
 import com.blps.lab2.security.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.transaction.UserTransaction;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Connection;
 import java.util.Optional;
@@ -29,10 +30,9 @@ public class CommonService {
     private final DebitRepository debitRepository;
     private final UserTransaction utx;
     private final AtomikosDataSourceBean dataSource;
-    private User user;
 
     public CommonService(UserRepository userRepository, CreditRepository creditRepository, JwtService jwtService,
-                         DebitRepository debitRepository, UserTransaction utx, AtomikosDataSourceBean dataSource) {
+                         DebitRepository debitRepository, UserTransaction utx,@Qualifier("mainDataSource") AtomikosDataSourceBean dataSource) {
         this.userRepository = userRepository;
         this.creditRepository = creditRepository;
         this.jwtService = jwtService;
@@ -64,36 +64,23 @@ public class CommonService {
         return null;
     }
 
-    public ResponseEntity<?> toFillProfile(Long id, UserDataDTO userDataDTO) throws Exception {
-
-
+    @Transactional("transactionManager")
+    public ResponseEntity<?> toFillProfile(Long id, UserDataDTO userDataDTO) {
         Optional<User> userOptional = userRepository.findById(id);
-        boolean rollback = false;
-        try {
-            utx.begin();
-            Connection connection = dataSource.getConnection();
-            user = userOptional.get();
-            user.setPassport(userDataDTO.getPassport());
-            user.setSalary(userDataDTO.getSalary());
-            user.setName(userDataDTO.getName());
-            user.setSurname(userDataDTO.getSurname());
-            user.setIs_fill(true);
-            userRepository.save(user);
-            connection.close();
+        if (!userOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
 
-        } catch (Exception e) {
-            rollback = true;
-        }
-        finally {
-            if (rollback) {
-                utx.rollback();
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tx crashed");
-            } else {
-                utx.commit();
-                return ResponseEntity.status(HttpStatus.OK).body(user);
-            }
-        }
-        return ResponseEntity.status(HttpStatus.OK).body("");
+        User user = userOptional.get();
+        user.setPassport(userDataDTO.getPassport());
+        user.setSalary(userDataDTO.getSalary());
+        user.setName(userDataDTO.getName());
+        user.setSurname(userDataDTO.getSurname());
+        user.setIs_fill(true);
+
+        userRepository.saveAndFlush(user);
+
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
     public Long extractIdFromJWT(String rHeader) {
