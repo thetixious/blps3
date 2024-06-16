@@ -8,7 +8,6 @@ import jakarta.transaction.TransactionManager;
 import jakarta.transaction.UserTransaction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
 
@@ -19,27 +18,27 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 public class TransactionManagerConfiguration {
 
 
-    @Bean()
+    @Bean
     public TransactionManager atomikosTransactionManager() throws SystemException {
         UserTransactionManager userTransactionManager = new UserTransactionManager();
-        userTransactionManager.setForceShutdown(false);
-        userTransactionManager.setTransactionTimeout(100000);
+        userTransactionManager.setForceShutdown(true);
+        userTransactionManager.setTransactionTimeout(300);
         return userTransactionManager;
     }
 
     @Bean(name = "userTransaction")
     public UserTransaction userTransaction() throws SystemException {
         UserTransactionImp userTransaction = new UserTransactionImp();
-        userTransaction.setTransactionTimeout(100000);
+        userTransaction.setTransactionTimeout(300);
         return userTransaction;
     }
 
     @Bean(name="transactionManager")
-    public PlatformTransactionManager transactionManager(UserTransaction userTransaction, TransactionManager atomikosTransactionManager){
+    public JtaTransactionManager transactionManager(UserTransaction userTransaction, TransactionManager atomikosTransactionManager){
         JtaTransactionManager jtaTransactionManager = new JtaTransactionManager();
         jtaTransactionManager.setUserTransaction(userTransaction);
         jtaTransactionManager.setTransactionManager(atomikosTransactionManager);
-        jtaTransactionManager.setDefaultTimeout(100000);
+        jtaTransactionManager.setDefaultTimeout(300);
         return jtaTransactionManager;
 
     }

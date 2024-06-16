@@ -52,6 +52,7 @@ public class MainDbConf {
         Map<String, String> mainJpaProperties = new HashMap<>();
         mainJpaProperties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         mainJpaProperties.put("hibernate.show_sql", "true");
+        mainJpaProperties.put("javax.persistence.transactionType", "JTA");
         return mainJpaProperties;
     }
 
