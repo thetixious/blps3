@@ -24,13 +24,13 @@ import java.util.Map;
 )
 public class BankDbConf {
 
-    @Value("${spring.bank.datasource.url}")
+    @Value("${spring.bank-datasource.url}")
     private String url;
 
-    @Value("${spring.bank.datasource.username}")
+    @Value("${spring.bank-datasource.username}")
     private String username;
 
-    @Value("${spring.bank.datasource.password}")
+    @Value("${spring.bank-datasource.password}")
     private String password;
     @Bean(name="bankDataSource",initMethod = "init", destroyMethod = "close")
     public AtomikosDataSourceBean bankDataSource() {
