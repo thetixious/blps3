@@ -16,9 +16,10 @@ public class CreditOffer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id")
+    private Long user_id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @Transient
     private User card_user;
 
     @Enumerated(EnumType.STRING)

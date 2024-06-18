@@ -89,7 +89,7 @@ public class DebitService {
 
         DebitOffer debitOffer = DTOToDebitOffer(debitOfferDTO);
         debitOffer.setCard_user(userRepository.findById(id).get());
-
+        debitOffer.setUser_id(id);
         return ResponseEntity.ok(debitOfferToDTO(debitRepository.saveAndFlush(debitOffer)));
     }
 

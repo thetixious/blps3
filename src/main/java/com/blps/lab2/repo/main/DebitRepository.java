@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DebitRepository extends JpaRepository<DebitOffer, Long> {
 
-    @Query("from DebitOffer do where do.card_user.id = :id")
+    @Query("SELECT do FROM DebitOffer do WHERE do.user_id = :id")
     DebitOffer findByUserId(@Param("id") Long id);
 }

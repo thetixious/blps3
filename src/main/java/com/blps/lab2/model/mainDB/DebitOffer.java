@@ -20,7 +20,9 @@ public class DebitOffer {
     @Enumerated(EnumType.STRING)
     private Bonus bonus;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @Column(name = "user_id")
+    private Long user_id;
+
+    @Transient
     private User card_user;
 }

@@ -2,6 +2,10 @@ package com.blps.lab2.model.mainDB;
 
 import com.blps.lab2.utils.Role;
 import jakarta.persistence.*;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,26 +18,43 @@ import java.util.Collection;
 import java.util.List;
 
 
-@Entity
-@Builder
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "my_user")
+@XmlRootElement(name = "user")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @XmlElement
     private Long id;
 
+    @XmlElement
     private String username;
+
+    @XmlElement
     private String name;
+
+    @XmlElement
     private String surname;
+
+    @XmlElement
     private String email;
+
+    @XmlElement
     private String password;
+
+    @XmlElement
     private String passport;
+
+    @XmlElement
     private Double salary;
+
+    @XmlElement
     private Boolean is_fill;
-    @Enumerated
+
+
+    @XmlElement
     private Role role;
 
 

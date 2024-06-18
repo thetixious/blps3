@@ -9,6 +9,8 @@ import com.blps.lab2.repo.main.UserRepository;
 import com.blps.lab2.security.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.transaction.UserTransaction;
+import jakarta.xml.bind.JAXBException;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -78,7 +80,7 @@ public class CommonService {
         user.setSurname(userDataDTO.getSurname());
         user.setIs_fill(true);
 
-        userRepository.saveAndFlush(user);
+        userRepository.save(user);
 
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }

@@ -17,7 +17,7 @@ public class UserService {
     }
     @Transactional
     public User save(User user) {
-        return userRepository.saveAndFlush(user);
+        return userRepository.save(user);
     }
 
     public User create(User user) {

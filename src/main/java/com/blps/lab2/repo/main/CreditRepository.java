@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CreditRepository extends JpaRepository<CreditOffer,Long> {
 
-    @Query("from CreditOffer co where co.card_user.id = :id")
+    @Query("from CreditOffer co where co.user_id = :id")
     CreditOffer findByUserId(@Param("id") Long id);
 
 }

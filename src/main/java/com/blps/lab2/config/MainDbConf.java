@@ -1,6 +1,12 @@
 package com.blps.lab2.config;
 
 import com.atomikos.spring.AtomikosDataSourceBean;
+import com.blps.lab2.repo.main.UserRepository;
+import com.blps.lab2.repo.main.XmlUserMarshaller;
+import com.blps.lab2.repo.main.XmlUserRepository;
+import com.blps.lab2.utils.Role;
+import jakarta.xml.bind.JAXBException;
+import lombok.RequiredArgsConstructor;
 import org.postgresql.xa.PGXADataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,9 +17,12 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +32,7 @@ import java.util.Map;
         entityManagerFactoryRef = "mainEntityManager"
 
 )
+@RequiredArgsConstructor
 public class MainDbConf {
 
     @Value("${spring.datasource.url}")
@@ -73,6 +83,17 @@ public class MainDbConf {
                 .persistenceUnit("main")
                 .jta(true)
                 .build();
+    }
+    @Bean
+    public XmlUserMarshaller xml(){
+        var xml = new XmlUserMarshaller();
+        xml.readUsers();
+        return xml;
+    }
+
+    @Bean
+    public UserRepository userRepository(XmlUserMarshaller xml) throws JAXBException {
+        return new XmlUserRepository(xml);
     }
 
 
