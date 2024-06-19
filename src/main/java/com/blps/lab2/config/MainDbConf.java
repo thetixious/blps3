@@ -55,6 +55,7 @@ public class MainDbConf {
         dataSource.setXaDataSource(pgxaDataSource);
         dataSource.setUniqueResourceName("mainDataSource");
         dataSource.setMaxPoolSize(100);
+        dataSource.setBorrowConnectionTimeout(5);
         return dataSource;
     }
 

@@ -22,14 +22,14 @@ public class TransactionManagerConfiguration {
     public TransactionManager atomikosTransactionManager() throws SystemException {
         UserTransactionManager userTransactionManager = new UserTransactionManager();
         userTransactionManager.setForceShutdown(true);
-        userTransactionManager.setTransactionTimeout(300);
+        userTransactionManager.setTransactionTimeout(5);
         return userTransactionManager;
     }
 
     @Bean(name = "userTransaction")
     public UserTransaction userTransaction() throws SystemException {
         UserTransactionImp userTransaction = new UserTransactionImp();
-        userTransaction.setTransactionTimeout(300);
+        userTransaction.setTransactionTimeout(5);
         return userTransaction;
     }
 
@@ -38,7 +38,7 @@ public class TransactionManagerConfiguration {
         JtaTransactionManager jtaTransactionManager = new JtaTransactionManager();
         jtaTransactionManager.setUserTransaction(userTransaction);
         jtaTransactionManager.setTransactionManager(atomikosTransactionManager);
-        jtaTransactionManager.setDefaultTimeout(300);
+        jtaTransactionManager.setDefaultTimeout(5);
         return jtaTransactionManager;
 
     }

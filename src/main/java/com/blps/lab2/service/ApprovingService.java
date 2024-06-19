@@ -5,6 +5,7 @@ import com.blps.lab2.model.bankDB.Manager;
 import com.blps.lab2.model.mainDB.CreditOffer;
 import com.blps.lab2.repo.bank.ManagerRepository;
 import com.blps.lab2.repo.main.CreditRepository;
+import com.blps.lab2.repo.main.UserRepository;
 import com.blps.lab2.utils.mapper.CreditCardMapper;
 import com.blps.lab2.utils.mapper.CreditOfferMapper;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class ApprovingService {
     private final CommonService commonService;
     private final CreditRepository creditRepository;
+    private final UserRepository userRepository;
     private final CreditOfferMapper creditOfferMapper;
     private final CreditCardMapper creditCardMapper;
     private TransactionTemplate transactionTemplate;
@@ -32,9 +34,10 @@ public class ApprovingService {
     private List<CreditCardDTO> response = new ArrayList<>();
 
 
-    public ApprovingService(CommonService commonService, CreditRepository creditRepository, CreditOfferMapper creditOfferMapper, CreditCardMapper creditCardMapper, ManagerRepository managerRepository, PlatformTransactionManager transactionManager) {
+    public ApprovingService(CommonService commonService, CreditRepository creditRepository, UserRepository userRepository, CreditOfferMapper creditOfferMapper, CreditCardMapper creditCardMapper, ManagerRepository managerRepository, PlatformTransactionManager transactionManager) {
         this.commonService = commonService;
         this.creditRepository = creditRepository;
+        this.userRepository = userRepository;
         this.creditOfferMapper = creditOfferMapper;
         this.creditCardMapper = creditCardMapper;
         this.managerRepository = managerRepository;
@@ -53,6 +56,7 @@ public class ApprovingService {
             return offerCheckResponse;
 
         CreditOffer creditOffer = creditRepository.findByUserId(id);
+        creditOffer.setCard_user(userRepository.findById(id).get());
         return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(creditOffer));
     }
 
@@ -65,6 +69,7 @@ public class ApprovingService {
         }
 
         CreditOffer creditOffer = creditRepository.findByUserId(id);
+        creditOffer.setCard_user(userRepository.findById(id).get());
         if (creditOffer.getReady()) {
             return ResponseEntity.status(HttpStatus.OK).body("Credit offer уже закрыт");
         }

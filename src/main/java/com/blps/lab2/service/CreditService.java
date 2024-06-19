@@ -93,7 +93,7 @@ public class CreditService {
 
     }
 
-    @Transactional("transactionManager")
+
     public ResponseEntity<?> creatOffer(Long id, CreditOfferDTO creditOfferDTO) throws Exception {
         ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
         ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, false, false);
@@ -105,7 +105,8 @@ public class CreditService {
             return offerCheckResponse;
 
         CreditOffer creditOffer = creditOfferMapper.toEntity(creditOfferDTO);
-        creditOffer.setCard_user(userRepository.findById(id).orElseThrow(() -> new Exception("User not found")));
+        creditOffer.setCard_user(userRepository.findById(id).get());
+        creditOffer.setUser_id(id);
         creditOffer.setReady(false);
         creditOffer.setApproved(false);
         creditOffer.setCards(getUncheckedCards(creditOffer));
@@ -148,6 +149,7 @@ public class CreditService {
             CreditOffer creditOffer = creditRepository.findByUserId(id);
             creditOffer.setCards(cardRepository.findAllByIdIn(cardsId));
             creditRepository.save(creditOffer);
+            creditOffer.setCard_user(userRepository.findById(id).get());
             creditOfferDTO = creditOfferMapper.toDTO(creditOffer);
             return ResponseEntity.status(HttpStatus.OK).body(creditOfferDTO);
 

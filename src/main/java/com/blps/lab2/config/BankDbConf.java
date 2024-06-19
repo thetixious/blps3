@@ -43,6 +43,7 @@ public class BankDbConf {
         dataSource.setXaDataSource(pgxaDataSource);
         dataSource.setUniqueResourceName("bankDataSource");
         dataSource.setMaxPoolSize(100);
+        dataSource.setBorrowConnectionTimeout(5);
         return dataSource;
     }
     public Map<String, String> bankJpaProperties() {
