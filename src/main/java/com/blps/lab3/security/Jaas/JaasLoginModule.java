@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
-import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 import java.io.IOException;
 import java.nio.file.attribute.UserPrincipal;
@@ -42,7 +41,7 @@ public class JaasLoginModule implements LoginModule {
 
     @SneakyThrows
     @Override
-    public boolean login() throws LoginException {
+    public boolean login() {
         var nameCallback = new NameCallback("username");
         var passwordCallback = new PasswordCallback("password", false);
         try {
@@ -63,7 +62,7 @@ public class JaasLoginModule implements LoginModule {
     }
 
     @Override
-    public boolean commit() throws LoginException {
+    public boolean commit() {
         if (!loginSucceeded) return false;
         if (username == null) throw new UsernameNotFoundException("username  is not specified");
         Principal principal = (UserPrincipal) () -> username;
@@ -73,12 +72,12 @@ public class JaasLoginModule implements LoginModule {
     }
 
     @Override
-    public boolean abort() throws LoginException {
+    public boolean abort()  {
         return false;
     }
 
     @Override
-    public boolean logout() throws LoginException {
+    public boolean logout() {
         return false;
     }
 }

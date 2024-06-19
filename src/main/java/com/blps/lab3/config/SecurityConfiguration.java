@@ -1,7 +1,6 @@
 package com.blps.lab3.config;
 
 import com.blps.lab3.security.JwtAuthenticationFilter;
-import com.blps.lab3.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,12 +25,10 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableMethodSecurity
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final UserService userService;
     private final AbstractJaasAuthenticationProvider jaasAuthenticationProvider;
 
-    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, UserService userService, AbstractJaasAuthenticationProvider jaasAuthenticationProvider) {
+    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, AbstractJaasAuthenticationProvider jaasAuthenticationProvider) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.userService = userService;
         this.jaasAuthenticationProvider = jaasAuthenticationProvider;
     }
 
@@ -49,7 +46,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**").permitAll()
-                        .requestMatchers( "/approval/**").hasRole("ADMIN")
+                        .requestMatchers("/approval/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(jaasAuthenticationProvider)
@@ -62,13 +59,6 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public AuthenticationProvider authenticationProvider() {
-//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-//        authProvider.setUserDetailsService(userService.userDetailsService());
-//        authProvider.setPasswordEncoder(passwordEncoder());
-//        return authProvider;
-//    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config)

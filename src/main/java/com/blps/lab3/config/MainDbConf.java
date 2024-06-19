@@ -4,7 +4,6 @@ import com.atomikos.spring.AtomikosDataSourceBean;
 import com.blps.lab3.repo.main.UserRepository;
 import com.blps.lab3.repo.main.XmlUserMarshaller;
 import com.blps.lab3.repo.main.XmlUserRepository;
-import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import org.postgresql.xa.PGXADataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -81,15 +80,16 @@ public class MainDbConf {
                 .jta(true)
                 .build();
     }
+
     @Bean
-    public XmlUserMarshaller xml(){
+    public XmlUserMarshaller xml() {
         var xml = new XmlUserMarshaller();
         xml.readUsers();
         return xml;
     }
 
     @Bean
-    public UserRepository userRepository(XmlUserMarshaller xml) throws JAXBException {
+    public UserRepository userRepository(XmlUserMarshaller xml) {
         return new XmlUserRepository(xml);
     }
 

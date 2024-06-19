@@ -19,8 +19,7 @@ import java.util.Map;
 @Configuration
 @EnableJpaRepositories(
         basePackages = {"com.blps.lab3.repo.bank"},
-        entityManagerFactoryRef = "bankEntityManager",
-        transactionManagerRef = "transactionManager"
+        entityManagerFactoryRef = "bankEntityManager"
 )
 public class BankDbConf {
 
@@ -32,7 +31,8 @@ public class BankDbConf {
 
     @Value("${spring.bank-datasource.password}")
     private String password;
-    @Bean(name="bankDataSource",initMethod = "init", destroyMethod = "close")
+
+    @Bean(name = "bankDataSource", initMethod = "init", destroyMethod = "close")
     public AtomikosDataSourceBean bankDataSource() {
         PGXADataSource pgxaDataSource = new PGXADataSource();
         pgxaDataSource.setUrl(url);
@@ -46,6 +46,7 @@ public class BankDbConf {
         dataSource.setBorrowConnectionTimeout(5);
         return dataSource;
     }
+
     public Map<String, String> bankJpaProperties() {
         Map<String, String> bankJpaProperties = new HashMap<>();
         bankJpaProperties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
@@ -62,6 +63,7 @@ public class BankDbConf {
                 new HibernateJpaVendorAdapter(), bankJpaProperties(), null
         );
     }
+
     @Bean(name = "bankEntityManager")
     public LocalContainerEntityManagerFactoryBean bankEntityManagerFactory(@Qualifier("bankEntityManagerFactoryBuilder") EntityManagerFactoryBuilder builder, @Qualifier("bankDataSource") DataSource dataSource) {
         return builder

@@ -1,6 +1,5 @@
 package com.blps.lab3.service;
 
-import com.atomikos.jdbc.AtomikosDataSourceBean;
 import com.blps.lab3.dto.UserDataDTO;
 import com.blps.lab3.model.mainDB.User;
 import com.blps.lab3.repo.main.CreditRepository;
@@ -8,9 +7,6 @@ import com.blps.lab3.repo.main.DebitRepository;
 import com.blps.lab3.repo.main.UserRepository;
 import com.blps.lab3.security.JwtService;
 import io.jsonwebtoken.Claims;
-import jakarta.transaction.UserTransaction;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -20,24 +16,21 @@ import java.util.Optional;
 
 @Component
 public class CommonService {
-    @Value("${token.key}")
-    private String jwtSigningKey;
+
     private final UserRepository userRepository;
     private final CreditRepository creditRepository;
 
     private final JwtService jwtService;
     private final DebitRepository debitRepository;
-    private final UserTransaction utx;
-    private final AtomikosDataSourceBean dataSource;
+
 
     public CommonService(UserRepository userRepository, CreditRepository creditRepository, JwtService jwtService,
-                         DebitRepository debitRepository, UserTransaction utx,@Qualifier("mainDataSource") AtomikosDataSourceBean dataSource) {
+                         DebitRepository debitRepository) {
         this.userRepository = userRepository;
         this.creditRepository = creditRepository;
         this.jwtService = jwtService;
         this.debitRepository = debitRepository;
-        this.utx = utx;
-        this.dataSource = dataSource;
+
     }
 
     public ResponseEntity<?> userCheck(Long id) {
@@ -66,7 +59,7 @@ public class CommonService {
     @Transactional("transactionManager")
     public ResponseEntity<?> toFillProfile(Long id, UserDataDTO userDataDTO) {
         Optional<User> userOptional = userRepository.findById(id);
-        if (!userOptional.isPresent()) {
+        if (userOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
@@ -87,8 +80,7 @@ public class CommonService {
 
         String jwtToken = rHeader.substring(7);
         Claims claims = jwtService.extractAllClaims(jwtToken);
-        Long id = claims.get("id", Long.class);
-        return id;
+        return  claims.get("id", Long.class);
     }
 
 

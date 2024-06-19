@@ -27,7 +27,6 @@ public class ApprovingService {
     private final UserRepository userRepository;
     private final CreditOfferMapper creditOfferMapper;
     private final CreditCardMapper creditCardMapper;
-    private TransactionTemplate transactionTemplate;
     private final ManagerRepository managerRepository;
     private final PlatformTransactionManager transactionManager;
     private List<CreditCardDTO> response = new ArrayList<>();
@@ -59,7 +58,7 @@ public class ApprovingService {
         return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(creditOffer));
     }
 
-    public ResponseEntity<?> getResult(Long id, List<Long> cardsId) throws Exception {
+    public ResponseEntity<?> getResult(Long id, List<Long> cardsId)  {
 
         ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
 
@@ -72,7 +71,7 @@ public class ApprovingService {
         if (creditOffer.getReady()) {
             return ResponseEntity.status(HttpStatus.OK).body("Credit offer уже закрыт");
         }
-        transactionTemplate = new TransactionTemplate(transactionManager);
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         try {
             transactionTemplate.execute(status -> {
 

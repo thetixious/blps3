@@ -14,7 +14,6 @@ import java.util.Set;
 @Repository
 public interface CardRepository extends JpaRepository<Cards,Long> {
 
-//    Set<Cards> findAllByTypeAndGoalOrBonus(CardType cardType, Goal goal, Bonus bonus);
     @Query("SELECT c FROM Cards c WHERE c.type = :type AND (c.goal = :goal OR c.bonus = :bonus)")
     Set<Cards> findAllByTypeAndGoalOrBonus(@Param("type") CardType type, @Param("goal") Goal goal, @Param("bonus") Bonus bonus);
 

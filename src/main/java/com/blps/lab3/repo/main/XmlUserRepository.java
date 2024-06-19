@@ -24,7 +24,6 @@ public class XmlUserRepository implements UserRepository {
     }
 
     public Optional<User> findById(Long id)  {
-        System.out.println(getAllUsers().stream().filter(user -> user.getId().equals(id)).findFirst().get().getName());
         return getAllUsers().stream().filter(user -> user.getId().equals(id)).findFirst();
     }
     @Override

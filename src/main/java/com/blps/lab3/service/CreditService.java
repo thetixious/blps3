@@ -4,7 +4,6 @@ import com.blps.lab3.dto.CreditOfferDTO;
 import com.blps.lab3.model.mainDB.Cards;
 import com.blps.lab3.model.mainDB.CreditOffer;
 import com.blps.lab3.model.mainDB.User;
-import com.blps.lab3.repo.bank.ManagerRepository;
 import com.blps.lab3.repo.main.CardRepository;
 import com.blps.lab3.repo.main.CreditRepository;
 import com.blps.lab3.repo.main.UserRepository;
@@ -13,7 +12,6 @@ import com.blps.lab3.utils.CardType;
 import com.blps.lab3.utils.Goal;
 import com.blps.lab3.utils.mapper.CreditCardMapper;
 import com.blps.lab3.utils.mapper.CreditOfferMapper;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,18 +30,15 @@ public class CreditService {
     private final CreditCardMapper creditCardMapper;
     private final CreditRepository creditRepository;
     private final CommonService commonService;
-    private CreditOfferDTO creditOfferDTO;
-    private final ManagerRepository managerRepository;
 
     public CreditService(CardRepository cardRepository, UserRepository userRepository, CreditOfferMapper creditOfferMapper, CreditCardMapper creditCardMapper,
-                         CreditRepository creditRepository, CommonService commonService, @Qualifier("managerRepository") ManagerRepository managerRepository) {
+                         CreditRepository creditRepository, CommonService commonService) {
         this.cardRepository = cardRepository;
         this.userRepository = userRepository;
         this.creditOfferMapper = creditOfferMapper;
         this.creditCardMapper = creditCardMapper;
         this.creditRepository = creditRepository;
         this.commonService = commonService;
-        this.managerRepository = managerRepository;
     }
 
     public Set<Cards> getUncheckedCards(CreditOffer creditOffer) {
@@ -53,16 +48,7 @@ public class CreditService {
 
     }
 
-    public CreditOfferDTO setOffer(CreditOfferDTO creditOfferDTO, Long id) {
-        CreditOffer creditOffer = creditOfferMapper.toEntity(creditOfferDTO);
-        creditOffer.setCard_user(userRepository.findById(id).get());
-        creditOffer.setReady(false);
-        creditOffer.setApproved(false);
-        creditOffer.setCards(getUncheckedCards(creditOffer));
-        creditOffer.setCredit_limit(creditOfferDTO.getCreditLimit());
-        return creditOfferMapper.toDTO(creditRepository.saveAndFlush(creditOffer));
 
-    }
 
 
     public ResponseEntity<?> getApprovedCards(Long id) {
@@ -91,7 +77,7 @@ public class CreditService {
     }
 
 
-    public ResponseEntity<?> creatOffer(Long id, CreditOfferDTO creditOfferDTO) throws Exception {
+    public ResponseEntity<?> creatOffer(Long id, CreditOfferDTO creditOfferDTO) {
         ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
         ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, false, false);
 
@@ -147,26 +133,11 @@ public class CreditService {
             creditOffer.setCards(cardRepository.findAllByIdIn(cardsId));
             creditRepository.save(creditOffer);
             creditOffer.setCard_user(userRepository.findById(id).get());
-            creditOfferDTO = creditOfferMapper.toDTO(creditOffer);
+        CreditOfferDTO creditOfferDTO = creditOfferMapper.toDTO(creditOffer);
             return ResponseEntity.status(HttpStatus.OK).body(creditOfferDTO);
 
 
 
-//
-//        CreditOffer creditOffer = creditRepository.findByUserId(id);
-//        creditOffer.setCards(cardRepository.findAllByIdIn(cardsId));
-//        creditRepository.saveAndFlush(creditOffer);
-//
-//        Optional<Manager> managerOptional = managerRepository.findFirstByStatusFalse();
-//        StringBuilder info = new StringBuilder();
-//        info.append(creditOffer.getCard_user().getEmail());
-//        info.append(creditOffer.getCredit_limit());
-//        info.append(creditOffer.getCard_user().getPassport());
-//        managerRepository.updateUserNameById(managerOptional.get().getId(), info.toString());
-//
-//
-//        creditOfferDTO = creditOfferMapper.toDTO(creditOffer);
-//        return ResponseEntity.status(HttpStatus.OK).body(creditOfferDTO);
 
 
     }
