@@ -49,8 +49,6 @@ public class CreditService {
     }
 
 
-
-
     public ResponseEntity<?> getApprovedCards(Long id) {
 
         ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
@@ -97,8 +95,6 @@ public class CreditService {
 
         CreditOffer savedCreditOffer = creditRepository.save(creditOffer);
         return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(savedCreditOffer));
-
-
     }
 
     public ResponseEntity<?> getCards(Long id) {
@@ -136,11 +132,5 @@ public class CreditService {
         CreditOfferDTO creditOfferDTO = creditOfferMapper.toDTO(creditOffer);
             return ResponseEntity.status(HttpStatus.OK).body(creditOfferDTO);
 
-
-
-
-
     }
-
-
 }

@@ -38,15 +38,12 @@ public class DebitService {
         this.commonService = commonService;
     }
 
-
     public DebitOfferDTO debitOfferToDTO(DebitOffer debitOffer) {
         return debitOfferMapper.toDTO(debitOffer);
     }
-
     public DebitOffer DTOToDebitOffer(DebitOfferDTO debitOfferDTO) {
         return debitOfferMapper.toEntity(debitOfferDTO);
     }
-
 
     public ResponseEntity<?> getCards(Long id) {
 
@@ -86,13 +83,10 @@ public class DebitService {
         if (offerCheckResponse != null)
             return offerCheckResponse;
 
-
         DebitOffer debitOffer = DTOToDebitOffer(debitOfferDTO);
         debitOffer.setCard_user(userRepository.findById(id).get());
         debitOffer.setUser_id(id);
         return ResponseEntity.ok(debitOfferToDTO(debitRepository.saveAndFlush(debitOffer)));
     }
-
-
 
 }

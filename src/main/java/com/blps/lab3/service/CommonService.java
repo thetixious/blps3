@@ -19,7 +19,6 @@ public class CommonService {
 
     private final UserRepository userRepository;
     private final CreditRepository creditRepository;
-
     private final JwtService jwtService;
     private final DebitRepository debitRepository;
 
@@ -30,7 +29,6 @@ public class CommonService {
         this.creditRepository = creditRepository;
         this.jwtService = jwtService;
         this.debitRepository = debitRepository;
-
     }
 
     public ResponseEntity<?> userCheck(Long id) {
@@ -62,7 +60,6 @@ public class CommonService {
         if (userOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
-
         User user = userOptional.get();
         user.setPassport(userDataDTO.getPassport());
         user.setSalary(userDataDTO.getSalary());
@@ -74,14 +71,10 @@ public class CommonService {
 
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
-
     public Long extractIdFromJWT(String rHeader) {
-
 
         String jwtToken = rHeader.substring(7);
         Claims claims = jwtService.extractAllClaims(jwtToken);
         return  claims.get("id", Long.class);
     }
-
-
 }
