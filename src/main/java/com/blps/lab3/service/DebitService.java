@@ -27,15 +27,17 @@ public class DebitService {
     private final UserRepository userRepository;
     private final DebitRepository debitRepository;
     private final CommonService commonService;
+    private final KafkaProducerService kafkaProducerService;
 
 
-    public DebitService(CardRepository cardRepository, DebitOfferMapper debitOfferMapper, DebitCardMapper debitCardMapper, UserRepository userRepository, DebitRepository debitRepository, CommonService commonService) {
+    public DebitService(CardRepository cardRepository, DebitOfferMapper debitOfferMapper, DebitCardMapper debitCardMapper, UserRepository userRepository, DebitRepository debitRepository, CommonService commonService, KafkaProducerService kafkaProducerService) {
         this.cardRepository = cardRepository;
         this.debitOfferMapper = debitOfferMapper;
         this.debitCardMapper = debitCardMapper;
         this.userRepository = userRepository;
         this.debitRepository = debitRepository;
         this.commonService = commonService;
+        this.kafkaProducerService = kafkaProducerService;
     }
 
     public DebitOfferDTO debitOfferToDTO(DebitOffer debitOffer) {
@@ -86,6 +88,7 @@ public class DebitService {
         DebitOffer debitOffer = DTOToDebitOffer(debitOfferDTO);
         debitOffer.setCard_user(userRepository.findById(id).get());
         debitOffer.setUser_id(id);
+        kafkaProducerService.sendMessage(debitOffer.toString());
         return ResponseEntity.ok(debitOfferToDTO(debitRepository.saveAndFlush(debitOffer)));
     }
 

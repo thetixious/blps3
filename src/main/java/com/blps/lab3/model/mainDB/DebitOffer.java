@@ -33,6 +33,17 @@ public class DebitOffer {
     private User card_user;
 
     @Override
+    public String toString() {
+        return "DebitOffer{" +
+                "id=" + id +
+                ", goal=" + goal +
+                ", bonus=" + bonus +
+                ", user_id=" + user_id +
+                ", card_user=" + card_user +
+                '}';
+    }
+
+    @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null) return false;
