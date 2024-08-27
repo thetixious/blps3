@@ -3,6 +3,7 @@ package com.blps.lab3.service;
 import com.blps.lab3.dto.DebitOfferDTO;
 import com.blps.lab3.model.mainDB.Cards;
 import com.blps.lab3.model.mainDB.DebitOffer;
+import com.blps.lab3.model.mainDB.ExpertMessage;
 import com.blps.lab3.model.mainDB.User;
 import com.blps.lab3.repo.main.CardRepository;
 import com.blps.lab3.repo.main.DebitRepository;
@@ -88,7 +89,10 @@ public class DebitService {
         DebitOffer debitOffer = DTOToDebitOffer(debitOfferDTO);
         debitOffer.setCard_user(userRepository.findById(id).get());
         debitOffer.setUser_id(id);
-        kafkaProducerService.sendMessage(debitOffer.toString());
+        ExpertMessage expertMessage = new ExpertMessage();
+        expertMessage.setName(debitOffer.getCard_user().getName());
+        expertMessage.setSurname(debitOffer.getCard_user().getSurname());
+        kafkaProducerService.sendMessage(expertMessage);
         return ResponseEntity.ok(debitOfferToDTO(debitRepository.saveAndFlush(debitOffer)));
     }
 
