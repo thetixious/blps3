@@ -61,7 +61,7 @@ public class CreditService {
             return offerCheckResponse;
 
         Optional<User> userOptional = userRepository.findById(id);
-        User user = userOptional.get();
+        User user = userOptional.orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.getIs_fill())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Сначала заполните профиль");
 
@@ -86,7 +86,7 @@ public class CreditService {
             return offerCheckResponse;
 
         CreditOffer creditOffer = creditOfferMapper.toEntity(creditOfferDTO);
-        creditOffer.setCard_user(userRepository.findById(id).get());
+        creditOffer.setCard_user(userRepository.findById(id).orElse(null));
         creditOffer.setUser_id(id);
         creditOffer.setReady(false);
         creditOffer.setApproved(false);

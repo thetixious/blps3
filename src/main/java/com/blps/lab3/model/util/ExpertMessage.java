@@ -1,4 +1,4 @@
-package com.blps.lab3.model.mainDB;
+package com.blps.lab3.model.util;
 
 import lombok.*;
 

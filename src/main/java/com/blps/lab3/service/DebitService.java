@@ -3,7 +3,7 @@ package com.blps.lab3.service;
 import com.blps.lab3.dto.DebitOfferDTO;
 import com.blps.lab3.model.mainDB.Cards;
 import com.blps.lab3.model.mainDB.DebitOffer;
-import com.blps.lab3.model.mainDB.ExpertMessage;
+import com.blps.lab3.model.util.ExpertMessage;
 import com.blps.lab3.model.mainDB.User;
 import com.blps.lab3.repo.main.CardRepository;
 import com.blps.lab3.repo.main.DebitRepository;
@@ -60,7 +60,9 @@ public class DebitService {
             return offerCheckResponse;
 
         Optional<User> userOptional = userRepository.findById(id);
-        User user = userOptional.get();
+        User user = userOptional.orElseThrow(() -> new RuntimeException("User not found"));
+
+
         if (!user.getIs_fill())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Сначала заполните профиль");
 
@@ -87,7 +89,7 @@ public class DebitService {
             return offerCheckResponse;
 
         DebitOffer debitOffer = DTOToDebitOffer(debitOfferDTO);
-        debitOffer.setCard_user(userRepository.findById(id).get());
+        debitOffer.setCard_user(userRepository.findById(id).orElse(null));
         debitOffer.setUser_id(id);
         ExpertMessage expertMessage = new ExpertMessage();
         expertMessage.setName(debitOffer.getCard_user().getName());

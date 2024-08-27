@@ -1,6 +1,6 @@
 package com.blps.lab3.config;
 
-import com.blps.lab3.model.mainDB.ExpertMessage;
+import com.blps.lab3.model.util.ExpertMessage;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -28,7 +28,7 @@ public class KafkaProducerConfig {
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,bootstrapAddress);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        properties.put(JsonSerializer.TYPE_MAPPINGS,"token: com.blps.lab3.model.mainDB.ExpertMessage");
+        properties.put(JsonSerializer.TYPE_MAPPINGS,"token: com.blps.lab3.model.util.ExpertMessage");
         return new DefaultKafkaProducerFactory<>(properties);
 
     }

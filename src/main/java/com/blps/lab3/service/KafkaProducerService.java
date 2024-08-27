@@ -1,7 +1,6 @@
 package com.blps.lab3.service;
 
-import com.blps.lab3.model.mainDB.ExpertMessage;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import com.blps.lab3.model.util.ExpertMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -17,8 +16,7 @@ public class KafkaProducerService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendMessage(ExpertMessage message){
-
-        kafkaTemplate.send(topicName,message);
+    public void sendMessage(ExpertMessage message) {
+        kafkaTemplate.send(topicName, message);
     }
 }
