@@ -1,6 +1,7 @@
 package com.blps.lab3.service;
 
 import com.blps.lab3.dto.CreditCardDTO;
+import com.blps.lab3.exception.customException.UserNotFoundByIdException;
 import com.blps.lab3.model.bankDB.Manager;
 import com.blps.lab3.model.mainDB.CreditOffer;
 import com.blps.lab3.model.mainDB.User;
@@ -21,9 +22,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
 public class ApprovingService {
-    private final CommonService commonService;
+
     private final CreditRepository creditRepository;
     private final UserRepository userRepository;
     private final CreditOfferMapper creditOfferMapper;
@@ -33,8 +35,7 @@ public class ApprovingService {
     private List<CreditCardDTO> response = new ArrayList<>();
 
 
-    public ApprovingService(CommonService commonService, CreditRepository creditRepository, UserRepository userRepository, CreditOfferMapper creditOfferMapper, CreditCardMapper creditCardMapper, ManagerRepository managerRepository, PlatformTransactionManager transactionManager) {
-        this.commonService = commonService;
+    public ApprovingService(CreditRepository creditRepository, UserRepository userRepository, CreditOfferMapper creditOfferMapper, CreditCardMapper creditCardMapper, ManagerRepository managerRepository, PlatformTransactionManager transactionManager) {
         this.creditRepository = creditRepository;
         this.userRepository = userRepository;
         this.creditOfferMapper = creditOfferMapper;
@@ -45,12 +46,7 @@ public class ApprovingService {
 
     public ResponseEntity<?> getInfo(Long id) {
 
-        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, true, false);
-
-        if (offerCheckResponse != null)
-            return offerCheckResponse;
         CreditOffer creditOffer = getExistedCreditOfferWithUserDetails(id);
-
         return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(creditOffer));
     }
 
@@ -74,7 +70,7 @@ public class ApprovingService {
                 info.append(creditOffer.getCredit_limit());
                 info.append(creditOffer.getCard_user().getPassport());
                 System.out.println(info);
-                Manager manager = managerOptional.get();
+                Manager manager = managerOptional.orElseThrow(() -> new RuntimeException("manager doesn't exist"));
                 manager.setData(info.toString());
                 manager.setStatus(true);
 
@@ -97,8 +93,9 @@ public class ApprovingService {
         CreditOffer creditOffer = creditRepository.findByUserId(id)
                 .orElseThrow(() -> new RuntimeException("Credit offer not found for user with ID: " + id));
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+                .orElseThrow(() -> new UserNotFoundByIdException(id.toString()));
         creditOffer.setCard_user(user);
         return creditOffer;
     }
+
 }

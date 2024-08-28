@@ -1,6 +1,7 @@
 package com.blps.lab3.service;
 
 import com.blps.lab3.dto.CreditOfferDTO;
+import com.blps.lab3.exception.customException.UserNotFoundByIdException;
 import com.blps.lab3.model.mainDB.Cards;
 import com.blps.lab3.model.mainDB.CreditOffer;
 import com.blps.lab3.model.mainDB.User;
@@ -18,6 +19,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/*
+    Service class for user's credit-card operations
+ */
 @Service
 public class CreditService {
 
@@ -49,28 +53,23 @@ public class CreditService {
 
     public ResponseEntity<?> getApprovedCards(Long id) {
 
-        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, true, false);
-
-        if (offerCheckResponse != null)
-            return offerCheckResponse;
-
-
-        CreditOffer creditOffer = getCreditOfferIfItExist(id);
         commonService.isItFeel(id);
-
+        CreditOffer creditOffer = getCreditOfferIfItExist(id);
 
         return !creditOffer.getReady()
-                ?ResponseEntity.status(HttpStatus.OK).body("Запрос в процессе обработки")
-                :ResponseEntity.status(HttpStatus.OK).body(creditOffer.getCards().stream().
+                ? ResponseEntity.status(HttpStatus.OK).body("Запрос в процессе обработки")
+                : ResponseEntity.status(HttpStatus.OK).body(creditOffer.getCards().stream().
                 map(creditCardMapper::toDTO).collect(Collectors.toList()));
 
 
     }
 
+    /*
+        Creates unapproved credit offer by user's initial parameters
+     */
+    public ResponseEntity<?> creatRowOffer(Long id, CreditOfferDTO creditOfferDTO) {
 
-    public ResponseEntity<?> creatOffer(Long id, CreditOfferDTO creditOfferDTO) {
-
-
+        checkCreditOfferDoesntExistBefore(id);
         CreditOffer creditOffer = creditOfferMapper.toEntity(creditOfferDTO);
         creditOffer.setCard_user(getUserIfItExist(id));
         creditOffer.setUser_id(id);
@@ -83,16 +82,13 @@ public class CreditService {
         return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(savedCreditOffer));
     }
 
-    public ResponseEntity<?> getCards(Long id) {
-
-        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, true, false);
-
-        if (offerCheckResponse != null)
-            return offerCheckResponse;
-
-        CreditOffer creditOffer = getCreditOfferIfItExist(id);
+    /*
+        Get card witch haven't unapproved by admin yet
+     */
+    public ResponseEntity<?> getYetUnapprovedCards(Long id) {
 
         commonService.isItFeel(id);
+        CreditOffer creditOffer = getCreditOfferIfItExist(id);
 
         Set<Cards> cardsList = cardRepository.findAllByTypeAndGoalOrBonus(CARD_TYPE,
                 creditOffer.getGoal(), creditOffer.getBonus());
@@ -103,6 +99,9 @@ public class CreditService {
 
     }
 
+    /*
+        Update
+     */
     public ResponseEntity<?> updateOfferByChosenCards(Long id, List<Long> cardsId) {
 
         CreditOffer creditOffer = getCreditOfferIfItExist(id);
@@ -121,6 +120,10 @@ public class CreditService {
 
     private User getUserIfItExist(Long id) {
         return userRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("User not found with ID: " + id));
+                new UserNotFoundByIdException(id.toString()));
+    }
+    private void checkCreditOfferDoesntExistBefore(Long id){
+        if (creditRepository.findByUserId(id).isPresent())
+            throw new RuntimeException("offer already exist");
     }
 }

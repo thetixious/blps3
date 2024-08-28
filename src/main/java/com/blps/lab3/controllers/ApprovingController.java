@@ -31,7 +31,7 @@ public class ApprovingController {
 
     @Operation(summary="Одобрение выбранных карт")
     @PostMapping(value = "/result")
-    public ResponseEntity<?> result(@RequestBody DataRequest approvalRequest) throws Exception {
+    public ResponseEntity<?> result(@RequestBody DataRequest approvalRequest) {
         LongWrapper longWrapper = approvalRequest.getLongWrapper();
         List<Long> cardsId = approvalRequest.getCardsId();
         return approvingService.getResult(longWrapper.getId(), cardsId);
