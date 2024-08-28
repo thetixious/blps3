@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface CreditRepository extends JpaRepository<CreditOffer,Long> {
 
     @Query("from CreditOffer co where co.user_id = :id")
-    CreditOffer findByUserId(@Param("id") Long id);
+    Optional<CreditOffer> findByUserId(@Param("id") Long id);
 
 }

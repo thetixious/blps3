@@ -3,6 +3,7 @@ package com.blps.lab3.service;
 import com.blps.lab3.dto.CreditCardDTO;
 import com.blps.lab3.model.bankDB.Manager;
 import com.blps.lab3.model.mainDB.CreditOffer;
+import com.blps.lab3.model.mainDB.User;
 import com.blps.lab3.repo.bank.ManagerRepository;
 import com.blps.lab3.repo.main.CreditRepository;
 import com.blps.lab3.repo.main.UserRepository;
@@ -44,33 +45,22 @@ public class ApprovingService {
 
     public ResponseEntity<?> getInfo(Long id) {
 
-        ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
         ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, true, false);
-
-        if (userCheckResponse != null)
-            return userCheckResponse;
 
         if (offerCheckResponse != null)
             return offerCheckResponse;
+        CreditOffer creditOffer = getExistedCreditOfferWithUserDetails(id);
 
-        CreditOffer creditOffer = creditRepository.findByUserId(id);
-        creditOffer.setCard_user(userRepository.findById(id).get());
         return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(creditOffer));
     }
 
-    public ResponseEntity<?> getResult(Long id, List<Long> cardsId)  {
+    public ResponseEntity<?> getResult(Long id, List<Long> cardsId) {
 
-        ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
-
-        if (userCheckResponse != null) {
-            return userCheckResponse;
-        }
-
-        CreditOffer creditOffer = creditRepository.findByUserId(id);
-        creditOffer.setCard_user(userRepository.findById(id).get());
+        CreditOffer creditOffer = getExistedCreditOfferWithUserDetails(id);
         if (creditOffer.getReady()) {
             return ResponseEntity.status(HttpStatus.OK).body("Credit offer уже закрыт");
         }
+
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         try {
             transactionTemplate.execute(status -> {
@@ -88,7 +78,6 @@ public class ApprovingService {
                 manager.setData(info.toString());
                 manager.setStatus(true);
 
-
                 response = creditOffer.getCards().stream()
                         .map(creditCardMapper::toDTO)
                         .collect(Collectors.toList());
@@ -102,5 +91,14 @@ public class ApprovingService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
         return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(response);
+    }
+
+    private CreditOffer getExistedCreditOfferWithUserDetails(Long id) {
+        CreditOffer creditOffer = creditRepository.findByUserId(id)
+                .orElseThrow(() -> new RuntimeException("Credit offer not found for user with ID: " + id));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+        creditOffer.setCard_user(user);
+        return creditOffer;
     }
 }

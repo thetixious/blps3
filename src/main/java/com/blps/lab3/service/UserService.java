@@ -13,6 +13,7 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
     public User save(User user) {
         return userRepository.save(user);
     }
@@ -34,10 +35,10 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
     }
+
     public UserDetailsService userDetailsService() {
         return this::getByUsername;
     }
-
 
 
 }

@@ -22,6 +22,7 @@ import java.util.Set;
 
 @Service
 public class DebitService {
+    private final CardType CARD_TYPE = CardType.DEBIT;
     private final CardRepository cardRepository;
     private final DebitOfferMapper debitOfferMapper;
     private final DebitCardMapper debitCardMapper;
@@ -41,61 +42,48 @@ public class DebitService {
         this.kafkaProducerService = kafkaProducerService;
     }
 
-    public DebitOfferDTO debitOfferToDTO(DebitOffer debitOffer) {
-        return debitOfferMapper.toDTO(debitOffer);
-    }
-    public DebitOffer DTOToDebitOffer(DebitOfferDTO debitOfferDTO) {
-        return debitOfferMapper.toEntity(debitOfferDTO);
-    }
-
     public ResponseEntity<?> getCards(Long id) {
 
-        ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
-        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, true,true);
-
-        if (userCheckResponse != null)
-            return userCheckResponse;
+        ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, true, true);
 
         if (offerCheckResponse != null)
             return offerCheckResponse;
 
-        Optional<User> userOptional = userRepository.findById(id);
-        User user = userOptional.orElseThrow(() -> new RuntimeException("User not found"));
-
-
-        if (!user.getIs_fill())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Сначала заполните профиль");
-
         DebitOffer debitOffer = debitRepository.findByUserId(id);
-        Goal goal = debitOffer.getGoal();
-        Bonus bonus = debitOffer.getBonus();
-        Set<Cards> cardsList = cardRepository.findAllByTypeAndGoalOrBonus(CardType.DEBIT,goal, bonus);
+        commonService.isItFeel(id);
+        Set<Cards> cardsList = cardRepository.findAllByTypeAndGoalOrBonus(CARD_TYPE,
+                debitOffer.getGoal(),
+                debitOffer.getBonus());
 
-        if (cardsList.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Нет карт с таким набором бонусов или целей");
-
-        return ResponseEntity.ok(cardsList.stream().map(debitCardMapper::toDTO).toList());
+        return cardsList.isEmpty()
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body("Goal or Bonus doesn't match with any card")
+                : ResponseEntity.ok(cardsList.stream().map(debitCardMapper::toDTO).toList());
     }
 
     public ResponseEntity<?> creatOffer(Long id, DebitOfferDTO debitOfferDTO) {
 
-        ResponseEntity<?> userCheckResponse = commonService.userCheck(id);
         ResponseEntity<?> offerCheckResponse = commonService.offerExistenceCheck(id, false, true);
-
-        if (userCheckResponse != null)
-            return userCheckResponse;
 
         if (offerCheckResponse != null)
             return offerCheckResponse;
 
+        commonService.isItFeel(id);
+
         DebitOffer debitOffer = DTOToDebitOffer(debitOfferDTO);
-        debitOffer.setCard_user(userRepository.findById(id).orElse(null));
+        debitOffer.setCard_user(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
         debitOffer.setUser_id(id);
         ExpertMessage expertMessage = new ExpertMessage();
         expertMessage.setName(debitOffer.getCard_user().getName());
         expertMessage.setSurname(debitOffer.getCard_user().getSurname());
         kafkaProducerService.sendMessage(expertMessage);
-        return ResponseEntity.ok(debitOfferToDTO(debitRepository.saveAndFlush(debitOffer)));
+        return ResponseEntity.ok(debitOfferToDTO(debitRepository.save(debitOffer)));
     }
 
+    public DebitOfferDTO debitOfferToDTO(DebitOffer debitOffer) {
+        return debitOfferMapper.toDTO(debitOffer);
+    }
+
+    public DebitOffer DTOToDebitOffer(DebitOfferDTO debitOfferDTO) {
+        return debitOfferMapper.toEntity(debitOfferDTO);
+    }
 }

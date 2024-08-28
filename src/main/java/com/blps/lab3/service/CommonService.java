@@ -1,6 +1,7 @@
 package com.blps.lab3.service;
 
 import com.blps.lab3.dto.UserDataDTO;
+import com.blps.lab3.model.mainDB.CreditOffer;
 import com.blps.lab3.model.mainDB.User;
 import com.blps.lab3.repo.main.CreditRepository;
 import com.blps.lab3.repo.main.DebitRepository;
@@ -31,10 +32,13 @@ public class CommonService {
         this.debitRepository = debitRepository;
     }
 
-    public ResponseEntity<?> userCheck(Long id) {
-        if (userRepository.findById(id).isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Нет пользователя с данным аутентификатором");
-        return null;
+    public CreditOffer getExistedCreditOffer(Long id) {
+        CreditOffer creditOffer = creditRepository.findByUserId(id)
+                .orElseThrow(() -> new RuntimeException("Credit offer not found for user with ID: " + id));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+        creditOffer.setCard_user(user);
+        return creditOffer;
     }
 
     public ResponseEntity<?> offerExistenceCheck(Long id, boolean shouldExists, boolean flag) {
@@ -70,6 +74,12 @@ public class CommonService {
         userRepository.save(user);
 
         return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+    public void isItFeel(Long id){
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        if (!user.getIs_fill())
+            throw  new RuntimeException("First of all fill the profile");
+
     }
     public Long extractIdFromJWT(String rHeader) {
 
