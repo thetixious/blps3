@@ -4,7 +4,6 @@ import com.blps.lab3.dto.DebitOfferDTO;
 import com.blps.lab3.exception.customException.UserNotFoundByIdException;
 import com.blps.lab3.model.mainDB.Cards;
 import com.blps.lab3.model.mainDB.DebitOffer;
-import com.blps.lab3.model.util.ExpertMessage;
 import com.blps.lab3.repo.main.CardRepository;
 import com.blps.lab3.repo.main.DebitRepository;
 import com.blps.lab3.repo.main.UserRepository;
@@ -26,17 +25,15 @@ public class DebitService {
     private final UserRepository userRepository;
     private final DebitRepository debitRepository;
     private final CommonService commonService;
-    private final KafkaProducerService kafkaProducerService;
 
 
-    public DebitService(CardRepository cardRepository, DebitOfferMapper debitOfferMapper, DebitCardMapper debitCardMapper, UserRepository userRepository, DebitRepository debitRepository, CommonService commonService, KafkaProducerService kafkaProducerService) {
+    public DebitService(CardRepository cardRepository, DebitOfferMapper debitOfferMapper, DebitCardMapper debitCardMapper, UserRepository userRepository, DebitRepository debitRepository, CommonService commonService) {
         this.cardRepository = cardRepository;
         this.debitOfferMapper = debitOfferMapper;
         this.debitCardMapper = debitCardMapper;
         this.userRepository = userRepository;
         this.debitRepository = debitRepository;
         this.commonService = commonService;
-        this.kafkaProducerService = kafkaProducerService;
     }
 
     public ResponseEntity<?> getCards(Long id) {
@@ -62,11 +59,6 @@ public class DebitService {
         debitOffer.setCard_user(userRepository.findById(id).orElseThrow(() -> new UserNotFoundByIdException(id.toString())));
         debitOffer.setUser_id(id);
 
-        ExpertMessage expertMessage = new ExpertMessage();
-        expertMessage.setName(debitOffer.getCard_user().getName());
-        expertMessage.setSurname(debitOffer.getCard_user().getSurname());
-        kafkaProducerService.sendMessage(expertMessage);
-
         return ResponseEntity.ok(debitOfferToDTO(debitRepository.save(debitOffer)));
     }
     private DebitOffer getDebitOfferIfItExist(Long id) {
@@ -75,7 +67,7 @@ public class DebitService {
     }
     private void checkCreditOfferDoesntExistBefore(Long id){
         if (debitRepository.findByUserId(id).isPresent())
-            throw new RuntimeException("offer already exist");
+            throw new RuntimeException("Offer already exist");
     }
 
     private DebitOfferDTO debitOfferToDTO(DebitOffer debitOffer) {

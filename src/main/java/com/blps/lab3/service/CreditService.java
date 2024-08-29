@@ -5,6 +5,7 @@ import com.blps.lab3.exception.customException.UserNotFoundByIdException;
 import com.blps.lab3.model.mainDB.Cards;
 import com.blps.lab3.model.mainDB.CreditOffer;
 import com.blps.lab3.model.mainDB.User;
+import com.blps.lab3.model.util.ExpertMessage;
 import com.blps.lab3.repo.main.CardRepository;
 import com.blps.lab3.repo.main.CreditRepository;
 import com.blps.lab3.repo.main.UserRepository;
@@ -32,15 +33,17 @@ public class CreditService {
     private final CreditCardMapper creditCardMapper;
     private final CreditRepository creditRepository;
     private final CommonService commonService;
+    private final KafkaProducerService kafkaProducerService;
 
     public CreditService(CardRepository cardRepository, UserRepository userRepository, CreditOfferMapper creditOfferMapper, CreditCardMapper creditCardMapper,
-                         CreditRepository creditRepository, CommonService commonService) {
+                         CreditRepository creditRepository, CommonService commonService, KafkaProducerService kafkaProducerService) {
         this.cardRepository = cardRepository;
         this.userRepository = userRepository;
         this.creditOfferMapper = creditOfferMapper;
         this.creditCardMapper = creditCardMapper;
         this.creditRepository = creditRepository;
         this.commonService = commonService;
+        this.kafkaProducerService = kafkaProducerService;
     }
 
     public Set<Cards> getUncheckedCards(CreditOffer creditOffer) {
@@ -60,15 +63,13 @@ public class CreditService {
                 ? ResponseEntity.status(HttpStatus.OK).body("Запрос в процессе обработки")
                 : ResponseEntity.status(HttpStatus.OK).body(creditOffer.getCards().stream().
                 map(creditCardMapper::toDTO).collect(Collectors.toList()));
-
-
     }
 
     /*
         Creates unapproved credit offer by user's initial parameters
      */
     public ResponseEntity<?> creatRowOffer(Long id, CreditOfferDTO creditOfferDTO) {
-
+        commonService.isItFeel(id);
         checkCreditOfferDoesntExistBefore(id);
         CreditOffer creditOffer = creditOfferMapper.toEntity(creditOfferDTO);
         creditOffer.setCard_user(getUserIfItExist(id));
@@ -99,17 +100,26 @@ public class CreditService {
 
     }
 
-    /*
-        Update
-     */
+
     public ResponseEntity<?> updateOfferByChosenCards(Long id, List<Long> cardsId) {
 
         CreditOffer creditOffer = getCreditOfferIfItExist(id);
         creditOffer.setCards(cardRepository.findAllByIdIn(cardsId));
         creditRepository.save(creditOffer);
         creditOffer.setCard_user(getUserIfItExist(id));
-        CreditOfferDTO creditOfferDTO = creditOfferMapper.toDTO(creditOffer);
-        return ResponseEntity.status(HttpStatus.OK).body(creditOfferDTO);
+        ExpertMessage message = ExpertMessage.builder()
+                .creditOfferId(creditOffer.getId())
+                .userId(creditOffer.getUser_id())
+                .candidateName(creditOffer.getCard_user().getName())
+                .candidateSurname(creditOffer.getCard_user().getSurname())
+                .candidateCreditLimit(creditOffer.getCredit_limit())
+                .candidateSalary(creditOffer.getCard_user().getSalary())
+                .candidatePassport(creditOffer.getCard_user().getPassport())
+                .preferredCards(creditOffer.getCards())
+                .build();
+        kafkaProducerService.sendMessage(message);
+        System.out.println("hello");
+        return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(creditOffer));
 
     }
 
@@ -122,7 +132,8 @@ public class CreditService {
         return userRepository.findById(id).orElseThrow(() ->
                 new UserNotFoundByIdException(id.toString()));
     }
-    private void checkCreditOfferDoesntExistBefore(Long id){
+
+    private void checkCreditOfferDoesntExistBefore(Long id) {
         if (creditRepository.findByUserId(id).isPresent())
             throw new RuntimeException("offer already exist");
     }
