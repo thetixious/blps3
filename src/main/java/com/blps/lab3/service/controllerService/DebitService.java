@@ -58,8 +58,8 @@ public class DebitService {
         DebitOffer debitOffer = DTOToDebitOffer(debitOfferDTO);
         debitOffer.setCard_user(userRepository.findById(id).orElseThrow(() -> new UserNotFoundByIdException(id.toString())));
         debitOffer.setUser_id(id);
-
-        return ResponseEntity.ok(debitOfferToDTO(debitRepository.save(debitOffer)));
+        System.out.println(debitOffer.getUser_id());
+        return ResponseEntity.ok(debitOfferToDTO(debitRepository.saveAndFlush(debitOffer)));
     }
     private DebitOffer getDebitOfferIfItExist(Long id) {
         return debitRepository.findByUserId(id).orElseThrow(() ->

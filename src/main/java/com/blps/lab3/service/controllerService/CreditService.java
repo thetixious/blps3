@@ -143,6 +143,7 @@ public class CreditService {
         CreditOffer creditOffer = creditRepository.findByUserId(expertMessage.getUserId()).orElseThrow();
         creditOffer.setCards(expertMessage.getPreferredCards());
         creditOffer.setReady(true);
+        creditOffer.setApproved(!creditOffer.getPreferredCards().isEmpty());
         creditRepository.save(creditOffer);
         System.out.println(expertMessage.getUserId());
     }
