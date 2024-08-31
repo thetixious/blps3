@@ -1,6 +1,8 @@
 package com.blps.lab3.service.controllerService;
 
 import com.blps.lab3.dto.DebitOfferDTO;
+import com.blps.lab3.exception.customException.OfferAlreadyExistException;
+import com.blps.lab3.exception.customException.OfferNotFoundException;
 import com.blps.lab3.exception.customException.UserNotFoundByIdException;
 import com.blps.lab3.model.mainDB.Cards;
 import com.blps.lab3.model.mainDB.DebitOffer;
@@ -58,16 +60,17 @@ public class DebitService {
         DebitOffer debitOffer = DTOToDebitOffer(debitOfferDTO);
         debitOffer.setCard_user(userRepository.findById(id).orElseThrow(() -> new UserNotFoundByIdException(id.toString())));
         debitOffer.setUser_id(id);
+        System.out.println(debitOffer.getUser_id());
+        return ResponseEntity.ok(debitOfferToDTO(debitRepository.saveAndFlush(debitOffer)));
+    }
 
-        return ResponseEntity.ok(debitOfferToDTO(debitRepository.save(debitOffer)));
-    }
     private DebitOffer getDebitOfferIfItExist(Long id) {
-        return debitRepository.findByUserId(id).orElseThrow(() ->
-                new RuntimeException("Debit offer not found for user with ID: " + id));
+        return debitRepository.findByUserId(id).orElseThrow(OfferNotFoundException::new);
     }
-    private void checkCreditOfferDoesntExistBefore(Long id){
+
+    private void checkCreditOfferDoesntExistBefore(Long id) {
         if (debitRepository.findByUserId(id).isPresent())
-            throw new RuntimeException("Offer already exist");
+            throw new OfferAlreadyExistException();
     }
 
     private DebitOfferDTO debitOfferToDTO(DebitOffer debitOffer) {

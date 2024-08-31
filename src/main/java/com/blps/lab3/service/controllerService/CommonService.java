@@ -36,16 +36,19 @@ public class CommonService {
 
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
-    public void isItFeel(Long id){
+
+    public void isItFeel(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundByIdException(id.toString()));
         if (!user.getIs_fill())
             throw new NotFilledProfileException();
 
     }
+
     public Long extractIdFromJWT(String rHeader) {
 
         String jwtToken = rHeader.substring(7);
         Claims claims = jwtService.extractAllClaims(jwtToken);
-        return  claims.get("id", Long.class);
+        return claims.get("id", Long.class);
     }
+
 }

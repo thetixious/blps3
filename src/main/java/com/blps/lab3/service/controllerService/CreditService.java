@@ -1,6 +1,8 @@
 package com.blps.lab3.service.controllerService;
 
 import com.blps.lab3.dto.CreditOfferDTO;
+import com.blps.lab3.exception.customException.OfferAlreadyExistException;
+import com.blps.lab3.exception.customException.OfferNotFoundException;
 import com.blps.lab3.exception.customException.UserNotFoundByIdException;
 import com.blps.lab3.model.mainDB.Cards;
 import com.blps.lab3.model.mainDB.CreditOffer;
@@ -15,6 +17,7 @@ import com.blps.lab3.utils.mapper.CreditCardMapper;
 import com.blps.lab3.utils.mapper.CreditOfferMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -108,6 +111,7 @@ public class CreditService {
         creditOffer.setCards(cardRepository.findAllByIdIn(cardsId));
         creditRepository.save(creditOffer);
         creditOffer.setCard_user(getUserIfItExist(id));
+
         ExpertMessage message = ExpertMessage.builder()
                 .creditOfferId(creditOffer.getId())
                 .userId(creditOffer.getUser_id())
@@ -118,15 +122,14 @@ public class CreditService {
                 .candidatePassport(creditOffer.getCard_user().getPassport())
                 .preferredCards(creditOffer.getCards())
                 .build();
+
         kafkaProducerService.sendMessage(message);
-        System.out.println("hello");
         return ResponseEntity.status(HttpStatus.OK).body(creditOfferMapper.toDTO(creditOffer));
 
     }
 
     private CreditOffer getCreditOfferIfItExist(Long id) {
-        return creditRepository.findByUserId(id).orElseThrow(() ->
-                new RuntimeException("Credit offer not found for user with ID: " + id));
+        return creditRepository.findByUserId(id).orElseThrow(OfferNotFoundException::new);
     }
 
     private User getUserIfItExist(Long id) {
@@ -136,14 +139,20 @@ public class CreditService {
 
     private void checkCreditOfferDoesntExistBefore(Long id) {
         if (creditRepository.findByUserId(id).isPresent())
-            throw new RuntimeException("offer already exist");
+            throw new OfferAlreadyExistException();
     }
 
     public void loadExpertMessageFromAudition(ExpertMessage expertMessage) {
         CreditOffer creditOffer = creditRepository.findByUserId(expertMessage.getUserId()).orElseThrow();
         creditOffer.setCards(expertMessage.getPreferredCards());
         creditOffer.setReady(true);
+        creditOffer.setApproved(!creditOffer.getPreferredCards().isEmpty());
         creditRepository.save(creditOffer);
         System.out.println(expertMessage.getUserId());
+    }
+
+    @Scheduled(cron = "0 59 23 * * *")
+    protected void scheduledCleaningCreditOffer() {
+        creditRepository.deleteByApprovedAndReady();
     }
 }

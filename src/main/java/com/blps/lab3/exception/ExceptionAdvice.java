@@ -2,6 +2,8 @@ package com.blps.lab3.exception;
 
 import com.blps.lab3.dto.Response;
 import com.blps.lab3.exception.customException.NotFilledProfileException;
+import com.blps.lab3.exception.customException.OfferAlreadyExistException;
+import com.blps.lab3.exception.customException.OfferNotFoundException;
 import com.blps.lab3.exception.customException.UserNotFoundByIdException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,17 @@ public class ExceptionAdvice {
     public ResponseEntity<Response> handleNotFoundUserException(UserNotFoundByIdException exception){
         Response response = new Response(exception.getMessage());
         return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OfferAlreadyExistException.class)
+    public ResponseEntity<Response> handleOfferAlreadyExistException(OfferAlreadyExistException exception){
+        Response response = new Response(exception.getMessage());
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+    @ExceptionHandler(OfferNotFoundException.class)
+    public ResponseEntity<Response> handleOfferNotFoundException(OfferNotFoundException exception){
+        Response response = new Response(exception.getMessage());
+        return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
