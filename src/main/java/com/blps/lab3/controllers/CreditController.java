@@ -2,8 +2,8 @@ package com.blps.lab3.controllers;
 
 import com.blps.lab3.dto.CreditOfferDTO;
 import com.blps.lab3.dto.UserDataDTO;
-import com.blps.lab3.service.CommonService;
-import com.blps.lab3.service.CreditService;
+import com.blps.lab3.service.controllerService.CommonService;
+import com.blps.lab3.service.controllerService.CreditService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class CreditController implements ControllerInt{
     @PostMapping(value = "/offer")
     public ResponseEntity<?> offer(@RequestHeader("Authorization") String authorizationHeader,@Valid @RequestBody CreditOfferDTO creditOfferDTO) {
 
-        return creditService.creatOffer(commonService.extractIdFromJWT(authorizationHeader), creditOfferDTO);
+        return creditService.creatRowOffer(commonService.extractIdFromJWT(authorizationHeader), creditOfferDTO);
 
     }
     @Operation(summary = "Вывод одобренных карт")
@@ -45,7 +45,7 @@ public class CreditController implements ControllerInt{
     @Operation(summary = "Вывод подходящих карт по бонусной программе")
     @GetMapping(value="/get_cards")
     public ResponseEntity<?> getCards(@RequestHeader("Authorization") String authorizationHeader){
-        return creditService.getCards(commonService.extractIdFromJWT(authorizationHeader));
+        return creditService.getYetUnapprovedCards(commonService.extractIdFromJWT(authorizationHeader));
     }
     @Operation(summary = "Выбор предпочитаемых карт")
     @PostMapping(value="/choose_cards")

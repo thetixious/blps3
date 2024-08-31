@@ -1,12 +1,10 @@
-package com.blps.lab3.service;
+package com.blps.lab3.service.controllerService;
 
 import com.blps.lab3.model.mainDB.User;
 import com.blps.lab3.repo.main.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -15,7 +13,7 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    @Transactional
+
     public User save(User user) {
         return userRepository.save(user);
     }
@@ -37,14 +35,10 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
     }
+
     public UserDetailsService userDetailsService() {
         return this::getByUsername;
     }
 
-    public User getCurrentUser() {
-
-        var username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getByUsername(username);
-    }
 
 }

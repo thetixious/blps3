@@ -1,4 +1,4 @@
-package com.blps.lab3.service;
+package com.blps.lab3.service.controllerService;
 
 import com.blps.lab3.security.utils.JwtAuthenticationResponse;
 import com.blps.lab3.security.utils.SignInRequest;

@@ -14,6 +14,7 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Entity
+
 @Table(name = "debit_offer")
 public class DebitOffer {
     @Id
@@ -31,6 +32,7 @@ public class DebitOffer {
 
     @Transient
     private User card_user;
+
 
     @Override
     public final boolean equals(Object o) {

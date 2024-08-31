@@ -3,7 +3,7 @@ package com.blps.lab3.controllers;
 import com.blps.lab3.security.utils.JwtAuthenticationResponse;
 import com.blps.lab3.security.utils.SignInRequest;
 import com.blps.lab3.security.utils.SignUpRequest;
-import com.blps.lab3.service.AuthenticationService;
+import com.blps.lab3.service.controllerService.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
