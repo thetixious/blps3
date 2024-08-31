@@ -2,8 +2,8 @@ package com.blps.lab3.controllers;
 
 import com.blps.lab3.dto.DebitOfferDTO;
 import com.blps.lab3.dto.UserDataDTO;
-import com.blps.lab3.service.CommonService;
-import com.blps.lab3.service.DebitService;
+import com.blps.lab3.service.controllerService.CommonService;
+import com.blps.lab3.service.controllerService.DebitService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

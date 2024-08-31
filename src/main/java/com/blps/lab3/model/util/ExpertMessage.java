@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.util.Set;
 
 @Data
+@RequiredArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ExpertMessage implements Serializable {
     private Long creditOfferId;

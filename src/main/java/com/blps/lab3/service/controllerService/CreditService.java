@@ -1,4 +1,4 @@
-package com.blps.lab3.service;
+package com.blps.lab3.service.controllerService;
 
 import com.blps.lab3.dto.CreditOfferDTO;
 import com.blps.lab3.exception.customException.UserNotFoundByIdException;
@@ -9,6 +9,7 @@ import com.blps.lab3.model.util.ExpertMessage;
 import com.blps.lab3.repo.main.CardRepository;
 import com.blps.lab3.repo.main.CreditRepository;
 import com.blps.lab3.repo.main.UserRepository;
+import com.blps.lab3.service.kafkaService.KafkaProducerService;
 import com.blps.lab3.utils.CardType;
 import com.blps.lab3.utils.mapper.CreditCardMapper;
 import com.blps.lab3.utils.mapper.CreditOfferMapper;
@@ -136,5 +137,13 @@ public class CreditService {
     private void checkCreditOfferDoesntExistBefore(Long id) {
         if (creditRepository.findByUserId(id).isPresent())
             throw new RuntimeException("offer already exist");
+    }
+
+    public void loadExpertMessageFromAudition(ExpertMessage expertMessage) {
+        CreditOffer creditOffer = creditRepository.findByUserId(expertMessage.getUserId()).orElseThrow();
+        creditOffer.setCards(expertMessage.getPreferredCards());
+        creditOffer.setReady(true);
+        creditRepository.save(creditOffer);
+        System.out.println(expertMessage.getUserId());
     }
 }

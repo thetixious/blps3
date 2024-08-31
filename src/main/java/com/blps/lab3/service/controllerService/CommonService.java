@@ -1,4 +1,4 @@
-package com.blps.lab3.service;
+package com.blps.lab3.service.controllerService;
 
 import com.blps.lab3.dto.UserDataDTO;
 import com.blps.lab3.exception.customException.NotFilledProfileException;

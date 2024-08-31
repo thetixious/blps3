@@ -1,4 +1,4 @@
-package com.blps.lab3.service;
+package com.blps.lab3.service.kafkaService;
 
 import com.blps.lab3.model.util.ExpertMessage;
 import org.springframework.beans.factory.annotation.Value;

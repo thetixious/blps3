@@ -1,6 +1,6 @@
 package com.blps.lab3.security;
 
-import com.blps.lab3.service.UserService;
+import com.blps.lab3.service.controllerService.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
