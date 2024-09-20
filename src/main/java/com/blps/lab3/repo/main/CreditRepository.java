@@ -19,6 +19,6 @@ public interface CreditRepository extends JpaRepository<CreditOffer, Long> {
     @Modifying
     @Transactional
     @Query("DELETE FROM CreditOffer e WHERE e.approved = false and e.ready = true")
-    void deleteByApprovedAndReady();
+    void deleteByNotApprovedAndReady();
 
 }

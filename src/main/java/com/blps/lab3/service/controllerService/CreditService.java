@@ -1,6 +1,7 @@
 package com.blps.lab3.service.controllerService;
 
 import com.blps.lab3.dto.CreditOfferDTO;
+import com.blps.lab3.exception.customException.NoCardWasApproved;
 import com.blps.lab3.exception.customException.OfferAlreadyExistException;
 import com.blps.lab3.exception.customException.OfferNotFoundException;
 import com.blps.lab3.exception.customException.UserNotFoundByIdException;
@@ -143,7 +144,7 @@ public class CreditService {
     }
 
     public void loadExpertMessageFromAudition(ExpertMessage expertMessage) {
-        CreditOffer creditOffer = creditRepository.findByUserId(expertMessage.getUserId()).orElseThrow();
+        CreditOffer creditOffer = creditRepository.findByUserId(expertMessage.getUserId()).orElseThrow(NoCardWasApproved::new);
         creditOffer.setCards(expertMessage.getPreferredCards());
         creditOffer.setReady(true);
         creditOffer.setApproved(!creditOffer.getPreferredCards().isEmpty());
@@ -153,6 +154,6 @@ public class CreditService {
 
     @Scheduled(cron = "0 59 23 * * *")
     protected void scheduledCleaningCreditOffer() {
-        creditRepository.deleteByApprovedAndReady();
+        creditRepository.deleteByNotApprovedAndReady();
     }
 }
